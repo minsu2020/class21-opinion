@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>2-1 익명 의견함</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --bg2: #111933;
+      --card: rgba(17, 25, 51, 0.82);
+      --card-strong: rgba(22, 31, 61, 0.95);
+      --line: rgba(148, 163, 184, 0.22);
+      --text: #eef2ff;
+      --muted: #a5b4d4;
+      --blue: #7aa2ff;
+      --blue-strong: #4f7cff;
+      --blue-soft: rgba(122, 162, 255, 0.14);
+      --green: #4ade80;
+      --green-soft: rgba(74, 222, 128, 0.14);
+      --red: #fb7185;
+      --red-soft: rgba(251, 113, 133, 0.14);
+      --yellow: #facc15;
+      --shadow: 0 20px 40px rgba(0, 0, 0, 0.28);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
+      background:
+        radial-gradient(circle at top, #22315f 0%, #0b1020 38%),
+        linear-gradient(180deg, #0b1020 0%, #0b1020 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .phone-shell {
+      max-width: 440px;
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 14px 14px 96px;
+      position: relative;
+    }
+
+    .status-space { height: 10px; }
+
+    .app-header {
+      padding: 8px 2px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .title-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .eyebrow {
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+
+    .title {
+      margin: 0;
+      font-size: 1.55rem;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+    }
+
+    .subline {
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+
+    .circle-btn {
+      width: 52px;
+      height: 52px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      font-size: 1.2rem;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px;
+      backdrop-filter: blur(14px);
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+    }
+
+    .composer {
+      background: linear-gradient(180deg, rgba(122, 162, 255, 0.18), rgba(17, 25, 51, 0.82));
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 800;
+    }
+
+    .panel-desc {
+      color: var(--muted);
+      font-size: 0.77rem;
+      margin-top: 3px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .badge-blue { background: var(--blue-soft); color: var(--blue); }
+    .badge-green { background: var(--green-soft); color: var(--green); }
+    .badge-red { background: var(--red-soft); color: var(--red); }
+    .badge-yellow { background: rgba(250, 204, 21, 0.12); color: var(--yellow); }
+
+    textarea, input {
+      width: 100%;
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      border-radius: 16px;
+      padding: 13px 14px;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    textarea::placeholder, input::placeholder { color: #92a0c5; }
+    textarea:focus, input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(122, 162, 255, 0.12); }
+    textarea { min-height: 102px; resize: none; }
+
+    .compose-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .hint {
+      font-size: 0.76rem;
+      color: var(--muted);
+      line-height: 1.45;
+      flex: 1;
+    }
+
+    .btn-blue, .btn-soft, .btn-red, .btn-ghost {
+      border: none;
+      border-radius: 13px;
+      padding: 10px 13px;
+      font-size: 0.88rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .btn-blue { background: linear-gradient(180deg, var(--blue), var(--blue-strong)); color: white; }
+    .btn-soft { background: var(--blue-soft); color: var(--blue); }
+    .btn-red { background: var(--red-soft); color: var(--red); }
+    .btn-ghost { background: rgba(255,255,255,0.08); color: var(--text); border: 1px solid var(--line); }
+
+    .scroll-box {
+      height: 240px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .scroll-box.tall { height: 70vh; }
+
+    .scroll-box::-webkit-scrollbar { width: 6px; }
+    .scroll-box::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.35); border-radius: 999px; }
+
+    .item {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      border-radius: 18px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+
+    .item:last-child { margin-bottom: 0; }
+
+    .item-text {
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.52;
+      font-size: 0.93rem;
+      margin-bottom: 10px;
+    }
+
+    .item-meta {
+      color: var(--muted);
+      font-size: 0.74rem;
+      margin-bottom: 10px;
+    }
+
+    .item-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .empty {
+      min-height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      border: 1px dashed var(--line);
+      border-radius: 16px;
+      color: var(--muted);
+      padding: 18px;
+      background: rgba(255,255,255,0.03);
+    }
+
+    .reject-zone {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed rgba(251, 113, 133, 0.32);
+    }
+
+    .reject-card {
+      background: rgba(251, 113, 133, 0.08);
+      border-color: rgba(251, 113, 133, 0.28);
+    }
+
+    .fab {
+      position: fixed;
+      left: max(14px, env(safe-area-inset-left));
+      bottom: max(14px, env(safe-area-inset-bottom));
+      width: 58px;
+      height: 58px;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: rgba(11,16,32,0.9);
+      color: white;
+      font-size: 1.18rem;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      z-index: 30;
+    }
+
+    .tabbar {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: max(10px, env(safe-area-inset-bottom));
+      width: min(412px, calc(100vw - 24px));
+      padding: 10px;
+      border-radius: 24px;
+      border: 1px solid var(--line);
+      background: rgba(11,16,32,0.82);
+      backdrop-filter: blur(14px);
+      box-shadow: var(--shadow);
+      display: flex;
+      justify-content: center;
+      color: var(--muted);
+      z-index: 20;
+      font-size: 0.82rem;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: rgba(3, 7, 18, 0.62);
+      z-index: 50;
+    }
+
+    .modal-backdrop.show { display: flex; }
+
+    .modal {
+      width: 100%;
+      max-width: 380px;
+      border-radius: 24px;
+      background: #111933;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .modal h2 { margin: 0 0 8px; font-size: 1.12rem; }
+    .modal p { margin: 0 0 12px; color: var(--muted); font-size: 0.88rem; line-height: 1.45; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
+
+    .notice {
+      display: none;
+      margin-top: 10px;
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-size: 0.83rem;
+      line-height: 1.45;
+    }
+    .notice.show { display: block; }
+    .notice.error { background: var(--red-soft); color: #ffd6dc; }
+    .notice.ok { background: var(--green-soft); color: #d9ffe6; }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="phone-shell">
+    <div class="status-space"></div>
+
+    <section id="mainView">
+      <header class="app-header">
+        <div class="title-wrap">
+          <div class="eyebrow">2학년 1반 모바일 의견 수집</div>
+          <h1 class="title">2-1 익명 의견함</h1>
+          <div class="subline">최신 의견이 위에 올라오고, 논의 중인 의견은 따로 관리됩니다.</div>
+        </div>
+        <button class="circle-btn" id="openExecutedBtn" aria-label="실행된 의견 보기">✅</button>
+      </header>
+
+      <section class="panel composer">
+        <div class="panel-head">
+          <div>
+            <h2 class="panel-title">의견 남기기</h2>
+            <div class="panel-desc">익명으로 등록됩니다.</div>
+          </div>
+          <span class="badge badge-blue">익명</span>
+        </div>
+        <textarea id="opinionInput" maxlength="300" placeholder="의견을 자유롭게 적어주세요.
+예: 청소 구역표를 더 보기 쉽게 바꾸기"></textarea>
+        <div class="notice error" id="inputError"></div>
+        <div class="notice ok" id="inputOk"></div>
+        <div class="compose-actions">
+          <div class="hint">욕설·심한 비방은 등록되지 않습니다. 한 번 등록되면 관리자 확인 전까지 수정은 불가합니다.</div>
+          <button class="btn-blue" id="submitBtn">등록</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2 class="panel-title">새로 들어온 의견</h2>
+            <div class="panel-desc">왼쪽 게시판 역할 · 관리자만 삭제 또는 이동 가능</div>
+          </div>
+          <span class="badge badge-yellow">대기</span>
+        </div>
+        <div class="scroll-box" id="incomingList"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2 class="panel-title">이야기 중인 의견</h2>
+            <div class="panel-desc">탈락 의견은 맨 아래 빨간색으로 내려갑니다.</div>
+          </div>
+          <span class="badge badge-green">논의</span>
+        </div>
+        <div class="scroll-box" id="discussionList"></div>
+      </section>
+    </section>
+
+    <section id="executedView" class="hidden">
+      <header class="app-header">
+        <div class="title-wrap">
+          <div class="eyebrow">실행 완료 목록</div>
+          <h1 class="title">실행된 의견</h1>
+          <div class="subline">이미 반영된 의견들을 확인할 수 있습니다.</div>
+        </div>
+        <button class="circle-btn" id="backToMainBtn" aria-label="뒤로가기">↩️</button>
+      </header>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2 class="panel-title">완료된 내용</h2>
+            <div class="panel-desc">최근 실행된 내용부터 위에 표시</div>
+          </div>
+          <span class="badge badge-green">완료</span>
+        </div>
+        <div class="scroll-box tall" id="executedList"></div>
+      </section>
+    </section>
+
+    <section id="logsView" class="hidden">
+      <header class="app-header">
+        <div class="title-wrap">
+          <div class="eyebrow">관리자 기록</div>
+          <h1 class="title">관리 로그</h1>
+          <div class="subline">누가, 언제, 어떤 처리를 했는지 기록됩니다.</div>
+        </div>
+        <button class="circle-btn" id="backFromLogsBtn" aria-label="뒤로가기">↩️</button>
+      </header>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2 class="panel-title">최근 관리 기록</h2>
+            <div class="panel-desc">로그는 최신순으로 표시됩니다.</div>
+          </div>
+          <span class="badge badge-blue">기록</span>
+        </div>
+        <div class="scroll-box tall" id="logsList"></div>
+      </section>
+    </section>
+  </div>
+
+  <button class="fab" id="adminOpenBtn" aria-label="관리자">⚙️</button>
+  <div class="tabbar">모바일 앱 느낌으로 보이도록 하단 바 형태 적용</div>
+
+  <div class="modal-backdrop" id="adminModal">
+    <div class="modal">
+      <h2>관리자 확인</h2>
+      <p>비밀번호 2121을 입력하면 관리자 기능이 열립니다.</p>
+      <input type="password" id="adminPasswordInput" placeholder="비밀번호 입력" inputmode="numeric" />
+      <div class="modal-actions">
+        <button class="btn-ghost" id="openLogsBtn">로그 보기</button>
+        <button class="btn-ghost" id="closeAdminModalBtn">취소</button>
+        <button class="btn-blue" id="loginAdminBtn">들어가기</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      getDocs,
+      updateDoc,
+      deleteDoc,
+      doc,
+      setDoc,
+      serverTimestamp,
+      orderBy,
+      query
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+     apiKey: "AIzaSyBm9MV1jSo3kEr1dBn3s8weL14_2h4Q_Mc",
+     authDomain: "class-opinion-box-3b040.firebaseapp.com",
+     projectId: "class-opinion-box-3b040",
+     storageBucket: "class-opinion-box-3b040.firebasestorage.app",
+     messagingSenderId: "1079703324890",
+     appId: "1:1079703324890:web:51c7460f6852005e803de3"
+    };
+
+
+    const FIREBASE_ENABLED = true;
+
+    const app = FIREBASE_ENABLED ? initializeApp(firebaseConfig) : null;
+    const db = FIREBASE_ENABLED ? getFirestore(app) : null;
+
+    const STORAGE_KEY = 'class_2_1_anonymous_box_v2';
+    const ADMIN_PASSWORD = '2121';
+    const PROFANITY_LIST = [
+      '시발', '씨발', 'ㅅㅂ', '병신', '븅신', 'ㅂㅅ', '개새끼', '새끼', '미친놈', '미친년', '닥쳐', '지랄', '꺼져', '존나', '좆', '엿먹', '창녀'
+    ];
+
+    const defaultData = {
+      incoming: [],
+      discussion: [],
+      executed: [],
+      logs: []
+    };
+
+    let state = loadLocalState();
+    let isAdmin = false;
+
+    const mainView = document.getElementById('mainView');
+    const executedView = document.getElementById('executedView');
+    const logsView = document.getElementById('logsView');
+    const incomingList = document.getElementById('incomingList');
+    const discussionList = document.getElementById('discussionList');
+    const executedList = document.getElementById('executedList');
+    const logsList = document.getElementById('logsList');
+    const opinionInput = document.getElementById('opinionInput');
+    const inputError = document.getElementById('inputError');
+    const inputOk = document.getElementById('inputOk');
+    const adminModal = document.getElementById('adminModal');
+    const adminPasswordInput = document.getElementById('adminPasswordInput');
+
+    function loadLocalState() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (!saved) return structuredClone(defaultData);
+      try {
+        const parsed = JSON.parse(saved);
+        return {
+          incoming: Array.isArray(parsed.incoming) ? parsed.incoming : [],
+          discussion: Array.isArray(parsed.discussion) ? parsed.discussion : [],
+          executed: Array.isArray(parsed.executed) ? parsed.executed : [],
+          logs: Array.isArray(parsed.logs) ? parsed.logs : []
+        };
+      } catch {
+        return structuredClone(defaultData);
+      }
+    }
+
+    function saveLocalState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function safeTime(value) {
+      if (!value) return '';
+      if (typeof value?.toDate === 'function') return value.toDate().toISOString();
+      return value;
+    }
+
+    function formatTime(dateString) {
+      if (!dateString) return '시간 정보 없음';
+      const date = new Date(dateString);
+      return new Intl.DateTimeFormat('ko-KR', {
+        month: 'numeric', day: 'numeric', hour: 'numeric', minute: '2-digit'
+      }).format(date);
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function containsProfanity(text) {
+      const lowered = text.toLowerCase().replace(/\s+/g, '');
+      return PROFANITY_LIST.some(word => lowered.includes(word));
+    }
+
+    function showMessage(type, message) {
+      inputError.classList.remove('show');
+      inputOk.classList.remove('show');
+      if (!message) return;
+      if (type === 'error') {
+        inputError.textContent = message;
+        inputError.classList.add('show');
+      } else {
+        inputOk.textContent = message;
+        inputOk.classList.add('show');
+      }
+    }
+
+    async function addLog(action, text, actor = '관리자') {
+      const log = {
+        id: crypto.randomUUID(),
+        action,
+        text,
+        actor,
+        createdAt: new Date().toISOString()
+      };
+      state.logs.unshift(log);
+      state.logs = state.logs.slice(0, 100);
+      saveLocalState();
+      if (FIREBASE_ENABLED) {
+        try {
+          await addDoc(collection(db, 'logs'), {
+            action,
+            text,
+            actor,
+            createdAt: serverTimestamp()
+          });
+        } catch (e) {
+          console.error('로그 저장 실패', e);
+        }
+      }
+    }
+
+    function renderIncoming() {
+      const sorted = [...state.incoming].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      if (sorted.length === 0) {
+        incomingList.innerHTML = '<div class="empty">아직 새 의견이 없습니다.</div>';
+        return;
+      }
+      incomingList.innerHTML = sorted.map(item => `
+        <article class="item">
+          <div class="item-text">${escapeHtml(item.text)}</div>
+          <div class="item-meta">등록: ${formatTime(item.createdAt)}</div>
+          ${isAdmin ? `
+          <div class="item-actions">
+            <button class="btn-red" onclick="deleteIncoming('${item.id}')">삭제</button>
+            <button class="btn-soft" onclick="moveToDiscussion('${item.id}')">오른쪽으로 이동</button>
+          </div>` : ''}
+        </article>`).join('');
+    }
+
+    function renderDiscussion() {
+      const discussing = [...state.discussion].filter(x => x.status === 'discussing').sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      const rejected = [...state.discussion].filter(x => x.status === 'rejected').sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt));
+
+      if (!discussing.length && !rejected.length) {
+        discussionList.innerHTML = '<div class="empty">현재 논의 중인 의견이 없습니다.</div>';
+        return;
+      }
+
+      const discussingHtml = discussing.map(item => `
+        <article class="item">
+          <div class="item-text">${escapeHtml(item.text)}</div>
+          <div class="item-meta">논의 시작: ${formatTime(item.createdAt)}</div>
+          <div class="item-actions">
+            <span class="badge badge-blue">이야기 중</span>
+            ${isAdmin ? `
+            <button class="btn-blue" onclick="markExecuted('${item.id}')">실행</button>
+            <button class="btn-red" onclick="markRejected('${item.id}')">탈락</button>` : ''}
+          </div>
+        </article>`).join('');
+
+      const rejectedHtml = rejected.length ? `
+        <div class="reject-zone">
+          ${rejected.map(item => `
+            <article class="item reject-card">
+              <div class="item-text">${escapeHtml(item.text)}</div>
+              <div class="item-meta">탈락 처리: ${formatTime(item.updatedAt || item.createdAt)}</div>
+              <div class="item-actions">
+                <span class="badge badge-red">선생님 확인 후 탈락</span>
+                ${isAdmin ? `<button class="btn-ghost" onclick="restoreRejected('${item.id}')">다시 논의</button>` : ''}
+              </div>
+            </article>`).join('')}
+        </div>` : '';
+
+      discussionList.innerHTML = discussingHtml + rejectedHtml;
+    }
+
+    function renderExecuted() {
+      const sorted = [...state.executed].sort((a, b) => new Date(b.executedAt) - new Date(a.executedAt));
+      if (!sorted.length) {
+        executedList.innerHTML = '<div class="empty">아직 실행된 의견이 없습니다.</div>';
+        return;
+      }
+      executedList.innerHTML = sorted.map(item => `
+        <article class="item">
+          <div class="item-text">${escapeHtml(item.text)}</div>
+          <div class="item-actions"><span class="badge badge-green">실행 완료</span></div>
+          <div class="item-meta" style="margin-top:10px; margin-bottom:0;">실행: ${formatTime(item.executedAt)}</div>
+        </article>`).join('');
+    }
+
+    function renderLogs() {
+      const sorted = [...state.logs].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      if (!sorted.length) {
+        logsList.innerHTML = '<div class="empty">아직 관리 로그가 없습니다.</div>';
+        return;
+      }
+      logsList.innerHTML = sorted.map(item => `
+        <article class="item">
+          <div class="item-text">[${escapeHtml(item.action)}] ${escapeHtml(item.text)}</div>
+          <div class="item-meta">${escapeHtml(item.actor)} · ${formatTime(item.createdAt)}</div>
+        </article>`).join('');
+    }
+
+    function renderAll() {
+      renderIncoming();
+      renderDiscussion();
+      renderExecuted();
+      renderLogs();
+      saveLocalState();
+    }
+
+    async function syncFromFirebase() {
+      if (!FIREBASE_ENABLED) {
+        renderAll();
+        return;
+      }
+      try {
+        const [incomingSnap, discussionSnap, executedSnap, logsSnap] = await Promise.all([
+          getDocs(query(collection(db, 'incoming'), orderBy('createdAt', 'desc'))),
+          getDocs(query(collection(db, 'discussion'), orderBy('createdAt', 'desc'))),
+          getDocs(query(collection(db, 'executed'), orderBy('executedAt', 'desc'))),
+          getDocs(query(collection(db, 'logs'), orderBy('createdAt', 'desc')))
+        ]);
+
+        state.incoming = incomingSnap.docs.map(d => ({ id: d.id, ...d.data(), createdAt: safeTime(d.data().createdAt) }));
+        state.discussion = discussionSnap.docs.map(d => ({ id: d.id, ...d.data(), createdAt: safeTime(d.data().createdAt), updatedAt: safeTime(d.data().updatedAt) }));
+        state.executed = executedSnap.docs.map(d => ({ id: d.id, ...d.data(), createdAt: safeTime(d.data().createdAt), executedAt: safeTime(d.data().executedAt) }));
+        state.logs = logsSnap.docs.map(d => ({ id: d.id, ...d.data(), createdAt: safeTime(d.data().createdAt) }));
+        renderAll();
+      } catch (e) {
+        console.error('Firebase 불러오기 실패', e);
+        showMessage('error', 'Firebase 연결에 실패해서 현재는 브라우저 저장 방식으로 동작합니다.');
+        renderAll();
+      }
+    }
+
+    async function createOpinion(text) {
+      const opinion = { id: crypto.randomUUID(), text, createdAt: new Date().toISOString() };
+      state.incoming.unshift(opinion);
+      saveLocalState();
+      if (FIREBASE_ENABLED) {
+        await setDoc(doc(db, 'incoming', opinion.id), { text, createdAt: serverTimestamp() });
+      }
+    }
+
+    async function addOpinion() {
+      const text = opinionInput.value.trim();
+      showMessage('', '');
+      if (!text) {
+        showMessage('error', '의견을 입력해야 등록됩니다.');
+        return;
+      }
+      if (containsProfanity(text)) {
+        showMessage('error', '욕설 또는 심한 비방이 포함되어 등록할 수 없습니다.');
+        return;
+      }
+      if (text.length < 4) {
+        showMessage('error', '의견을 조금 더 구체적으로 적어주세요.');
+        return;
+      }
+      try {
+        await createOpinion(text);
+        opinionInput.value = '';
+        showMessage('ok', '의견이 등록되었습니다.');
+        await syncFromFirebase();
+      } catch (e) {
+        console.error('의견 등록 실패', e);
+        showMessage('error', '등록 중 오류가 발생했습니다.');
+      }
+    }
+
+    window.deleteIncoming = async function(id) {
+      const found = state.incoming.find(item => item.id === id);
+      state.incoming = state.incoming.filter(item => item.id !== id);
+      renderAll();
+      await addLog('삭제', found?.text || '의견 삭제');
+      if (FIREBASE_ENABLED) await deleteDoc(doc(db, 'incoming', id));
+      await syncFromFirebase();
+    }
+
+    window.moveToDiscussion = async function(id) {
+      const found = state.incoming.find(item => item.id === id);
+      if (!found) return;
+      state.incoming = state.incoming.filter(item => item.id !== id);
+      state.discussion.unshift({ id: found.id, text: found.text, status: 'discussing', createdAt: new Date().toISOString() });
+      renderAll();
+      await addLog('오른쪽 이동', found.text);
+      if (FIREBASE_ENABLED) {
+        await deleteDoc(doc(db, 'incoming', id));
+        await setDoc(doc(db, 'discussion', id), { text: found.text, status: 'discussing', createdAt: serverTimestamp() });
+      }
+      await syncFromFirebase();
+    }
+
+    window.markExecuted = async function(id) {
+      const found = state.discussion.find(item => item.id === id);
+      if (!found) return;
+      state.discussion = state.discussion.filter(item => item.id !== id);
+      state.executed.unshift({ id: found.id, text: found.text, createdAt: found.createdAt, executedAt: new Date().toISOString() });
+      renderAll();
+      await addLog('실행', found.text);
+      if (FIREBASE_ENABLED) {
+        await deleteDoc(doc(db, 'discussion', id));
+        await setDoc(doc(db, 'executed', id), { text: found.text, createdAt: found.createdAt || serverTimestamp(), executedAt: serverTimestamp() });
+      }
+      await syncFromFirebase();
+    }
+
+    window.markRejected = async function(id) {
+      const found = state.discussion.find(item => item.id === id);
+      state.discussion = state.discussion.map(item => item.id === id ? { ...item, status: 'rejected', updatedAt: new Date().toISOString() } : item);
+      renderAll();
+      await addLog('탈락', found?.text || '의견 탈락');
+      if (FIREBASE_ENABLED) await updateDoc(doc(db, 'discussion', id), { status: 'rejected', updatedAt: serverTimestamp() });
+      await syncFromFirebase();
+    }
+
+    window.restoreRejected = async function(id) {
+      const found = state.discussion.find(item => item.id === id);
+      state.discussion = state.discussion.map(item => item.id === id ? { ...item, status: 'discussing', updatedAt: new Date().toISOString() } : item);
+      renderAll();
+      await addLog('다시 논의', found?.text || '다시 논의');
+      if (FIREBASE_ENABLED) await updateDoc(doc(db, 'discussion', id), { status: 'discussing', updatedAt: serverTimestamp() });
+      await syncFromFirebase();
+    }
+
+    function showView(target) {
+      mainView.classList.add('hidden');
+      executedView.classList.add('hidden');
+      logsView.classList.add('hidden');
+      target.classList.remove('hidden');
+    }
+
+    function openAdminModal() {
+      adminModal.classList.add('show');
+      adminPasswordInput.value = '';
+      setTimeout(() => adminPasswordInput.focus(), 50);
+    }
+
+    function closeAdminModal() {
+      adminModal.classList.remove('show');
+    }
+
+    function loginAdmin() {
+      if (adminPasswordInput.value !== ADMIN_PASSWORD) {
+        alert('비밀번호가 틀렸습니다.');
+        return;
+      }
+      isAdmin = true;
+      closeAdminModal();
+      renderAll();
+      alert('관리자 모드가 열렸습니다.');
+    }
+
+    document.getElementById('submitBtn').addEventListener('click', addOpinion);
+    document.getElementById('openExecutedBtn').addEventListener('click', () => showView(executedView));
+    document.getElementById('backToMainBtn').addEventListener('click', () => showView(mainView));
+    document.getElementById('backFromLogsBtn').addEventListener('click', () => showView(mainView));
+    document.getElementById('adminOpenBtn').addEventListener('click', openAdminModal);
+    document.getElementById('closeAdminModalBtn').addEventListener('click', closeAdminModal);
+    document.getElementById('loginAdminBtn').addEventListener('click', loginAdmin);
+    document.getElementById('openLogsBtn').addEventListener('click', () => {
+      closeAdminModal();
+      showView(logsView);
+    });
+
+    adminPasswordInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') loginAdmin();
+    });
+
+    adminModal.addEventListener('click', (e) => {
+      if (e.target === adminModal) closeAdminModal();
+    });
+
+    syncFromFirebase();
+  </script>
+</body>
+</html>
